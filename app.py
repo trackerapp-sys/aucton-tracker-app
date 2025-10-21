@@ -8,7 +8,6 @@ import re
 import pytz
 import os
 from dotenv import load_dotenv
-import json
 from datetime import datetime as dt
 
 load_dotenv()
@@ -288,6 +287,14 @@ def update_settings():
     
     manager.log_message(f"Settings updated: Time zone {data['timezone']}, format {data['date_format']}")
     return jsonify({'success': True, 'message': 'Settings updated'})
+
+@app.route('/test')
+def test():
+    return "App is working! If you see this, Flask is running correctly."
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy', 'message': 'Server is running'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
