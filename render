@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: facebook-auction-manager
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FB_ACCESS_TOKEN
+        value: your_facebook_access_token_here
+      - key: SECRET_KEY
+        value: your_secret_key_here

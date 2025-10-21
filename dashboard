@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Automatic Facebook Auction Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .auction-card { transition: all 0.3s; }
+        .auction-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .log-entry { font-family: 'Courier New', monospace; font-size: 0.9em; }
+        .status-active { color: #28a745; }
+        .status-ended { color: #dc3545; }
+        .nav-tabs .nav-link.active { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">🤖 Automatic Facebook Auction Manager</h1>
+                
+                <!-- Control Panel -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-success me-2" id="startMonitoring">
+                                    <i class="fas fa-play"></i> Start Monitoring
+                                </button>
+                                <button class="btn btn-danger me-2" id="stopMonitoring">
+                                    <i class="fas fa-stop"></i> Stop Monitoring
+                                </button>
+                                <button class="btn btn-info" id="exportBids">
+                                    <i class="fas fa-download"></i> Export Bids
+                                </button>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <span id="monitoringStatus" class="badge bg-secondary">Stopped</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                            <i class="fas fa-mobile-alt"></i> Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                            <i class="fas fa-chart-bar"></i> Analytics
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="log-tab" data-bs-toggle="tab" data-bs-target="#log" type="button" role="tab">
+                            <i class="fas fa-scroll"></i> API Log
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content p-3 border border-top-0" id="myTabContent">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Active Auctions</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAuctionModal">
+                                <i class="fas fa-plus"></i> Add Auction
+                            </button>
+                        </div>
+                        <div id="auctionsList"></div>
+                    </div>
+
+                    <!-- Analytics Tab -->
+                    <div class="tab-pane fade" id="analytics" role="tabpanel">
+                        <h4 class="mb-3">Bid History</h4>
+                        <div id="analyticsContent"></div>
+                    </div>
+
+                    <!-- Log Tab -->
+                    <div class="tab-pane fade" id="log" role="tabpanel">
+                        <h4 class="mb-3">API Log</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="logContent" style="max-height: 500px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-pane fade" id="settings" role="tabpanel">
+                        <h4 class="mb-3">Settings</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Time Zone</label>
+                                    <select class="form-select" id="timezoneSelect">
+                                        <option value="Australia/Sydney">Australia/Sydney</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="US/Pacific">US/Pacific</option>
+                                        <option value="US/Eastern">US/Eastern</option>
+                                        <option value="Europe/London">Europe/London</option>
+                                        <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Date Format</label>
+                                    <select class="form-select" id="dateFormatSelect">
+                                        <option value="%d/%m/%Y %H:%M">DD/MM/YYYY HH:MM</option>
+                                        <option value="%m/%d/%Y %H:%M">MM/DD/YYYY HH:MM</option>
+                                        <option value="%Y-%m-%d %H:%M">YYYY-MM-DD HH:MM</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="saveSettings">
+                                    <i class="fas fa-save"></i> Apply Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Auction Modal -->
+    <div class="modal fade" id="addAuctionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Auction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAuctionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Post ID</label>
+                            <input type="text" class="form-control" name="post_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Start Time (DD/MM/YYYY HH:MM)</label>
+                            <input type="text" class="form-control" name="start_time" placeholder="20/10/2025 19:30" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">End Time (DD/MM/YYYY HH:MM)</label>
+                            <input type="text" class="form-control" name="end_time" placeholder="20/10/2025 21:30" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Starting Bid</label>
+                            <input type="number" class="form-control" name="starting_bid" step="0.01" value="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitAuction">Add Auction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Update data every 5 seconds
+        setInterval(updateData, 5000);
+        updateData();
+
+        async function updateData() {
+            await updateAuctions();
+            await updateAnalytics();
+            await updateLogs();
+            await updateMonitoringStatus();
+        }
+
+        async function updateAuctions() {
+            const response = await fetch('/api/auctions');
+            const auctions = await response.json();
+            
+            const container = document.getElementById('auctionsList');
+            if (auctions.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No auctions added yet.</div>';
+                return;
+            }
+
+            container.innerHTML = auctions.map(auction => `
+                <div class="card auction-card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Post ID:</strong><br>${auction.post_id}
+                            </div>
+                            <div class="col-md-2">
+                                <strong>Current Bid:</strong><br>${auction.current_bid}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Bidder:</strong><br>${auction.bidder}
+                            </div>
+                            <div class="col-md-2">
+                                <strong>Status:</strong><br>
+                                <span class="status-${auction.status.toLowerCase()}">${auction.status}</span>
+                            </div>
+                            <div class="col-md-2">
+                                <strong>End Time:</strong><br>${auction.end_time}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateAnalytics() {
+            const response = await fetch('/api/analytics');
+            const analytics = await response.json();
+            
+            const container = document.getElementById('analyticsContent');
+            if (Object.keys(analytics).length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No bid history available.</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(analytics).map(([postId, bids]) => `
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>Auction ${postId}</strong>
+                    </div>
+                    <div class="card-body">
+                        ${bids.length === 0 ? 
+                            '<div class="text-muted">No bids yet</div>' :
+                            bids.map(bid => `
+                                <div class="border-bottom py-2">
+                                    <strong>${bid.time}:</strong> ${bid.bidder} bid ${bid.amount}
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function updateLogs() {
+            const response = await fetch('/api/logs');
+            const data = await response.json();
+            
+            const container = document.getElementById('logContent');
+            container.innerHTML = data.logs.map(log => `
+                <div class="log-entry border-bottom py-1">${log}</div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function updateMonitoringStatus() {
+            const response = await fetch('/api/monitoring/status');
+            const data = await response.json();
+            
+            const statusElement = document.getElementById('monitoringStatus');
+            if (data.monitoring) {
+                statusElement.className = 'badge bg-success';
+                statusElement.textContent = 'Monitoring';
+            } else {
+                statusElement.className = 'badge bg-secondary';
+                statusElement.textContent = 'Stopped';
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('startMonitoring').addEventListener('click', async () => {
+            await fetch('/api/monitoring', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'start'})
+            });
+            updateMonitoringStatus();
+        });
+
+        document.getElementById('stopMonitoring').addEventListener('click', async () => {
+            await fetch('/api/monitoring', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'stop'})
+            });
+            updateMonitoringStatus();
+        });
+
+        document.getElementById('exportBids').addEventListener('click', async () => {
+            window.location.href = '/api/export';
+        });
+
+        document.getElementById('submitAuction').addEventListener('click', async () => {
+            const form = document.getElementById('addAuctionForm');
+            const formData = new FormData(form);
+            
+            const auctionData = {
+                post_id: formData.get('post_id'),
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time'),
+                starting_bid: formData.get('starting_bid')
+            };
+
+            const response = await fetch('/api/auctions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(auctionData)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                bootstrap.Modal.getInstance(document.getElementById('addAuctionModal')).hide();
+                form.reset();
+                updateData();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        });
+
+        document.getElementById('saveSettings').addEventListener('click', async () => {
+            const settings = {
+                timezone: document.getElementById('timezoneSelect').value,
+                date_format: document.getElementById('dateFormatSelect').value
+            };
+
+            const response = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(settings)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Settings updated successfully');
+                updateData();
+            } else {
+                alert('Error updating settings');
+            }
+        });
+    </script>
+</body>
+</html>
