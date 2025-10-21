@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import requests
 import datetime
 import threading
@@ -14,6 +15,23 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Simple user class for authentication
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = id
+
+# Mock user database (replace with real database in production)
+users = {'admin': {'password': 'password123'}}  # Username: admin, Password: password123
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id) if user_id in users else None
 
 class Auction:
     def __init__(self, post_id, start_time, end_time, starting_bid=0, timezone='Australia/Sydney'):
@@ -203,15 +221,36 @@ class FacebookAuctionManager:
 # Global manager instance
 manager = FacebookAuctionManager()
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username in users and users[username]['password'] == password:
+            user = User(username)
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        return render_template('login.html', error='Invalid credentials')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
 @app.route('/')
+@login_required
 def dashboard():
     return render_template('dashboard.html')
 
 @app.route('/api/auctions', methods=['GET'])
+@login_required
 def get_auctions():
     return jsonify(manager.get_auctions_data())
 
 @app.route('/api/auctions', methods=['POST'])
+@login_required
 def add_auction():
     data = request.json
     success, message = manager.add_auction(
@@ -223,7 +262,17 @@ def add_auction():
     )
     return jsonify({'success': success, 'message': message})
 
+@app.route('/api/auctions/<post_id>', methods=['DELETE'])
+@login_required
+def delete_auction(post_id):
+    if post_id in manager.auctions:
+        del manager.auctions[post_id]
+        manager.log_message(f"Auction {post_id} deleted")
+        return jsonify({'success': True, 'message': 'Auction deleted'})
+    return jsonify({'success': False, 'message': 'Auction not found'})
+
 @app.route('/api/monitoring', methods=['POST'])
+@login_required
 def toggle_monitoring():
     action = request.json.get('action')
     if action == 'start':
@@ -235,18 +284,22 @@ def toggle_monitoring():
     return jsonify({'success': False, 'message': 'Invalid action'})
 
 @app.route('/api/monitoring/status')
+@login_required
 def monitoring_status():
     return jsonify({'monitoring': manager.monitoring})
 
 @app.route('/api/logs')
+@login_required
 def get_logs():
     return jsonify({'logs': manager.log_messages[-100:]})  # Last 100 log entries
 
 @app.route('/api/analytics')
+@login_required
 def get_analytics():
     return jsonify(manager.get_bid_history())
 
 @app.route('/api/export')
+@login_required
 def export_bids():
     if not manager.auctions:
         return jsonify({'success': False, 'message': 'No auctions to export'})
@@ -270,6 +323,7 @@ def export_bids():
         return jsonify({'success': False, 'message': f'Export failed: {error_str}'})
 
 @app.route('/api/settings', methods=['POST'])
+@login_required
 def update_settings():
     data = request.json
     manager.timezone = pytz.timezone(data['timezone'])
