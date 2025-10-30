@@ -1,7 +1,6 @@
 ﻿flask==3.0.3
 flask-login==0.6.3
 requests==2.32.3
-price-parser==1.1.1
 python-dotenv==1.0.1
 gunicorn==22.0.0
 pytz==2024.1
