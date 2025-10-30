@@ -350,5 +350,184 @@ def test():
 def health():
     return jsonify({'status': 'healthy', 'message': 'Server is running'})
 
+# Policy Routes for Meta Review
+@app.route('/privacy-policy')
+def privacy_policy():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Privacy Policy - Facebook Auction Tracker</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 800px; margin: 0 auto; }
+            h1 { color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+            h2 { color: #555; margin-top: 30px; }
+            .last-updated { color: #666; font-style: italic; }
+        </style>
+    </head>
+    <body>
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last updated: 2024</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>Our Facebook Auction Tracker application collects the following information when you grant permission:</p>
+        <ul>
+            <li>Basic profile information (name, email, user ID)</li>
+            <li>Posts and comments for auction monitoring</li>
+            <li>Bid information from auction comments</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use the collected information solely for:</p>
+        <ul>
+            <li>Monitoring auction posts and comments</li>
+            <li>Tracking bids and bidder information</li>
+            <li>Managing auction timelines and winners</li>
+            <li>Posting auction updates and notifications</li>
+        </ul>
+
+        <h2>3. Data Storage and Security</h2>
+        <p>We do not store any of your Facebook data on our servers. All data is:</p>
+        <ul>
+            <li>Processed locally on your device</li>
+            <li>Only stored in your local browser session</li>
+            <li>Never transmitted to any external servers except Facebook's API</li>
+            <li>Deleted when you close the application</li>
+        </ul>
+
+        <h2>4. Data Sharing</h2>
+        <p>We do not share, sell, or distribute your personal information to any third parties. Your data remains exclusively on your local device.</p>
+
+        <h2>5. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Access the data we process</li>
+            <li>Delete all locally stored data by closing the application</li>
+            <li>Revoke Facebook permissions at any time through your Facebook settings</li>
+        </ul>
+
+        <h2>6. Facebook API Compliance</h2>
+        <p>Our application complies with Facebook's Platform Policies and only accesses data you explicitly permit through the Facebook login process.</p>
+
+        <h2>7. Contact Information</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us at: your-email@domain.com</p>
+
+        <h2>8. Changes to This Policy</h2>
+        <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+    </body>
+    </html>
+    """
+
+@app.route('/terms-of-service')
+def terms_of_service():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Terms of Service - Facebook Auction Tracker</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 800px; margin: 0 auto; }
+            h1 { color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+            h2 { color: #555; margin-top: 30px; }
+            .last-updated { color: #666; font-style: italic; }
+        </style>
+    </head>
+    <body>
+        <h1>Terms of Service</h1>
+        <p class="last-updated">Last updated: 2024</p>
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>By using the Facebook Auction Tracker application, you agree to be bound by these Terms of Service.</p>
+
+        <h2>2. Description of Service</h2>
+        <p>Our application provides automated auction monitoring and management for Facebook posts. The service tracks bids, manages auction timelines, and posts updates through Facebook comments.</p>
+
+        <h2>3. User Responsibilities</h2>
+        <p>You agree to:</p>
+        <ul>
+            <li>Use the application in compliance with Facebook's Platform Policies</li>
+            <li>Not use the application for any illegal or unauthorized purpose</li>
+            <li>Maintain the security of your Facebook access tokens</li>
+            <li>Only monitor auctions you have permission to manage</li>
+        </ul>
+
+        <h2>4. Data Handling</h2>
+        <p>All data processing occurs locally on your device. We do not store, transmit, or process your Facebook data on any external servers.</p>
+
+        <h2>5. Intellectual Property</h2>
+        <p>The application and its original content are owned by us. Your Facebook data remains your property.</p>
+
+        <h2>6. Termination</h2>
+        <p>We may terminate or suspend access to our application immediately if you violate these Terms.</p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>We are not liable for any damages resulting from your use of the application.</p>
+
+        <h2>8. Changes to Terms</h2>
+        <p>We reserve the right to modify these terms at any time.</p>
+
+        <h2>9. Contact</h2>
+        <p>Questions about these Terms? Contact: your-email@domain.com</p>
+    </body>
+    </html>
+    """
+
+@app.route('/data-deletion')
+def data_deletion():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Data Deletion Instructions - Facebook Auction Tracker</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 800px; margin: 0 auto; }
+            h1 { color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+            h2 { color: #555; margin-top: 30px; }
+            .last-updated { color: #666; font-style: italic; }
+        </style>
+    </head>
+    <body>
+        <h1>Data Deletion Instructions</h1>
+        <p class="last-updated">Last updated: 2024</p>
+
+        <h2>How to Delete Your Data</h2>
+        <p>Since our application does not store any of your personal data on external servers, data deletion is simple:</p>
+
+        <h3>Option 1: Close the Application</h3>
+        <p>All your data is stored locally in your browser session. Simply close the application and all data will be automatically deleted.</p>
+
+        <h3>Option 2: Clear Browser Data</h3>
+        <p>If you want to ensure complete deletion:</p>
+        <ul>
+            <li>Open your browser settings</li>
+            <li>Navigate to "Privacy and Security"</li>
+            <li>Click "Clear browsing data"</li>
+            <li>Select "Cached images and files" and "Site data"</li>
+            <li>Click "Clear data"</li>
+        </ul>
+
+        <h3>Option 3: Revoke Facebook Permissions</h3>
+        <p>To remove our application's access to your Facebook data:</p>
+        <ul>
+            <li>Go to your Facebook Settings</li>
+            <li>Click "Apps and Websites"</li>
+            <li>Find "Facebook Auction Tracker" in your active apps</li>
+            <li>Click "Remove" to revoke all permissions</li>
+        </ul>
+
+        <h2>Contact</h2>
+        <p>If you need assistance with data deletion, contact us at: your-email@domain.com</p>
+
+        <p><strong>Note:</strong> We never store your personal data on our servers, so no server-side data deletion is required.</p>
+    </body>
+    </html>
+    """
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
