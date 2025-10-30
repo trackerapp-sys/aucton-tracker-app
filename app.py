@@ -4,7 +4,6 @@ import requests
 import datetime
 import threading
 import time
-from price_parser import Price
 import re
 import pytz
 import os
@@ -58,12 +57,10 @@ class Auction:
         return False
 
     def parse_bid(self, comment_text, commenter_id, commenter_name):
-        price = Price.fromstring(comment_text)
-        if price and price.amount is not None and price.amount > self.current_bid:
-            return float(price.amount)
-        match = re.search(r'(\d+(?:\.\d{2})?)', comment_text)
+        # Simple bid parsing without price_parser
+        match = re.search(r'(\$?\s*(\d+(?:\.\d{2})?))', comment_text)
         if match:
-            amount = float(match.group(1))
+            amount = float(match.group(2))
             if amount > self.current_bid:
                 return amount
         return None
@@ -220,6 +217,8 @@ class FacebookAuctionManager:
 
 # Global manager instance
 manager = FacebookAuctionManager()
+
+# ... (rest of your Flask routes remain the same, including the policy routes)s
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
