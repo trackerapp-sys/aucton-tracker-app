@@ -1,0 +1,53 @@
+{
+  "headers": [
+    {
+      "source": "**/*",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'"
+        }
+      ]
+    }{
+  "headers": [
+    {
+      "source": "**/*",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/terms-of-service", 
+      "destination": "/terms-of-service.html"
+    },
+    {
+      "source": "/data-deletion",
+      "destination": "/data-deletion.html"
+    }
+  ]
+}
+  ],
+  "rewrites": [
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/terms-of-service", 
+      "destination": "/terms-of-service.html"
+    },
+    {
+      "source": "/data-deletion",
+      "destination": "/data-deletion.html"
+    }
+  ]
+}
